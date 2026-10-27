@@ -45,7 +45,10 @@ jobs:
       - name: Set base（用户页→空；项目页→/<repo>/）
         run: |
           repo="${{ github.event.repository.name }}"
-          if [[ "$repo" == *.github.io ]]; then
+          owner="${{ github.repository_owner }}"
+          # 只有仓库名严格等于 <owner>.github.io 才是用户页（根路径）；
+          # 否则（包括 Aaron-AiMingYi.github.io 这种挂在别人名下的）都是项目页，带 /<repo>/ 前缀。
+          if [[ "$repo" == "${owner}.github.io" ]]; then
             echo "ASTRO_BASE=" >> "$GITHUB_ENV"
           else
             echo "ASTRO_BASE=/$repo/" >> "$GITHUB_ENV"

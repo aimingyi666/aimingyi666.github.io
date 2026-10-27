@@ -31,7 +31,7 @@ npm run check    # 构建 + 链接审计（发布前必跑）
 
 ### 启用步骤
 
-1. 把这个仓库推到 GitHub（本仓库即 `aimingyi666.github.io` 用户页）。
+1. 把这个仓库推到 GitHub。工作流会按仓库名自动判断 `base`：只有仓库名严格等于 `<owner>.github.io` 才当用户页（根路径），其余都当项目页带 `/<repo>/` 前缀（例如本仓库 `Aaron-AiMingYi.github.io` 在 owner `aimingyi666` 下是项目页，地址 `https://aimingyi666.github.io/Aaron-AiMingYi.github.io/`）。
 2. 仓库 **Settings → Pages → Build and deployment → Source** 选 **GitHub Actions**。
 3. 之后每次 `git push` 到 `main`，Actions 自动跑：安装依赖 → 构建 → 链接审计 → 发布。
 
