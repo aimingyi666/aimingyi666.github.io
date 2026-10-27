@@ -1,8 +1,11 @@
 # 部署到 GitHub Pages（Astro 静态站，零后端）
 #
-# 默认按「项目页」部署：https://<owner>.github.io/<repo>/
-# 如果你用的是自定义域名或 <user>.github.io 用户页，把下面 build 步骤的
-# ASTRO_BASE 去掉（留空），并视情况把 ASTRO_SITE 改成你的域名。
+# push 到 main 就自动构建并发布，不用本地手动传文件。
+#
+# 两种 Pages 形态自动适配（靠仓库名判断）：
+#   - 用户页仓库（名形如 <user>.github.io）：站点在根域名，base 留空
+#   - 项目页仓库（其他名字）：站点在 /<repo>/ 子路径，base 自动设为 /<repo>/
+# 页面代码、资源、RSS、搜索全部 base 感知，无需手动改链接。
 #
 # 启用方式（仓库 Settings → Pages → Build and deployment → Source 选 GitHub Actions）
 
@@ -26,11 +29,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # 项目页：自动取仓库名作为子路径，如 /slow-variable/。
-    # 放在 job 级，build 和 audit 两步都要用到（audit 要剥掉 base 才能对上磁盘文件）。
+    # 站点正式域名（canonical / RSS 绝对链接用）。base 由下面步骤按仓库名自动决定。
     env:
       ASTRO_SITE: https://${{ github.repository_owner }}.github.io
-      ASTRO_BASE: /${{ github.event.repository.name }}/
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -40,6 +41,15 @@ jobs:
         with:
           node-version: 20
           cache: npm
+
+      - name: Set base（用户页→空；项目页→/<repo>/）
+        run: |
+          repo="${{ github.event.repository.name }}"
+          if [[ "$repo" == *.github.io ]]; then
+            echo "ASTRO_BASE=" >> "$GITHUB_ENV"
+          else
+            echo "ASTRO_BASE=/$repo/" >> "$GITHUB_ENV"
+          fi
 
       - name: Install dependencies
         run: npm ci

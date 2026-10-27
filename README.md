@@ -1,6 +1,6 @@
 # 慢变量 · 站点使用说明
 
-Astro 静态站。内容用 Markdown 写，构建后是一叠 HTML。
+Astro 静态站。内容用 Markdown 写，构建后是一叠纯静态 HTML，可以直接托管到任意静态服务或 GitHub Pages。
 
 ---
 
@@ -9,54 +9,45 @@ Astro 静态站。内容用 Markdown 写，构建后是一叠 HTML。
 ```bash
 npm run dev      # 本地写作预览，带热更新（http://localhost:4321）
 npm run new      # 新建一篇文章（交互式，自动生成 frontmatter）
-npm run check    # 构建 + 只用一条命令做完审计（发布前跑这个）
+npm run check    # 构建 + 链接审计（发布前必跑）
 ```
 
 **第一次加文章？看 [`怎么加文章.md`](./怎么加文章.md)** —— 三种方式、每个字段的含义、常见错误都在里面。
-
-发布：把 `dist/` 整个目录传到任意静态托管（Cloudflare Pages / Vercel / GitHub Pages / 自己的服务器）。
 
 ---
 
 ## 部署到 GitHub Pages
 
-构建产物 `dist/` 是纯静态文件，可以直接上 GitHub Pages。仓库里已经配好了 `.github/workflows/deploy.yml`，**push 到 `main` 就自动构建并发布**，不用本地手动传文件。
+构建产物 `dist/` 是纯静态文件，可以直接上 GitHub Pages。仓库里已经配好 `.github/workflows/deploy.yml`：**push 到 `main` 就自动构建并发布**，不用本地手动传文件。
 
-### 两种 Pages 地址，区别只在一个 `base`
+### 两种 Pages 形态，工作流自动适配
 
-| 你的 Pages 地址 | `base` 怎么设 | 说明 |
-|---|---|---|
-| 自定义域名（`example.com`）或用户页（`<user>.github.io`） | 留空（默认） | 站点就在根路径，所有链接原样工作 |
-| 项目页（`<user>.github.io/<repo>/`） | `/<repo>/` | 所有链接要带仓库名前缀，否则 404 |
+| 仓库类型 | 例子 | 站点地址 | `base` |
+|---|---|---|---|
+| 用户页（仓库名 `<user>.github.io`） | `aimingyi666.github.io` | `https://aimingyi666.github.io/` | 自动留空（根路径） |
+| 项目页（其他名字） | `slow-variable` | `https://<user>.github.io/slow-variable/` | 自动设为 `/<repo>/` |
 
-代码已经做成 `base` 感知：`<a href>`、CSS/JS 资源、搜索索引、RSS 都会自动带上这个前缀，你**不用改任何页面代码**。
+**不用手动改任何 `base`**：工作流按仓库名判断——用户页仓库名以 `.github.io` 结尾就留空，否则取仓库名当子路径。所有页面链接、CSS/JS 资源、搜索索引、RSS 都会自动带上对应前缀（或根路径不加）。
 
-### 一键启用（推荐，项目页）
+### 启用步骤
 
-1. 把仓库推到 GitHub。
+1. 把这个仓库推到 GitHub（本仓库即 `aimingyi666.github.io` 用户页）。
 2. 仓库 **Settings → Pages → Build and deployment → Source** 选 **GitHub Actions**。
-3. push 到 `main` 分支，Actions 会自动跑：安装依赖 → 构建 → 链接审计 → 发布。
+3. 之后每次 `git push` 到 `main`，Actions 自动跑：安装依赖 → 构建 → 链接审计 → 发布。
 
-工作流里已经自动注入了项目页需要的两个环境变量（用仓库名当子路径）：
+### 自定义域名
 
-```yaml
-ASTRO_SITE: https://<owner>.github.io
-ASTRO_BASE: /<仓库名>/          # 例如 /slow-variable/
-```
+如果要用自己的域名（而非 `*.github.io`），在仓库 **Settings → Pages → Custom domain** 填域名并配好 DNS 即可。`ASTRO_SITE` 仍用默认的 `https://<owner>.github.io`，GitHub Pages 会把根域请求映射到你的自定义域名，无需改 `base`、也无需改工作流。
 
-### 自定义域名 / 用户页
-
-把 `deploy.yml` 里 build 步骤的两个 `env` 去掉（或把 `ASTRO_BASE` 设为空），并视情况把 `ASTRO_SITE` 改成你的域名。其余不变。
-
-### 本地构建验证（手动发布时）
+### 本地构建验证
 
 ```bash
-npm run build                                   # 普通根域构建
-ASTRO_BASE=/slow-variable/ npm run build        # 模拟项目页构建，验证前缀是否正确
-npm run check                                   # 构建 + 链接审计
+npm run build                            # 普通构建（base 由 ASTRO_BASE 决定，默认空）
+ASTRO_BASE=/slow-variable/ npm run build # 模拟项目页构建，验证前缀是否正确
+npm run check                            # 构建 + 链接审计（发布前必跑）
 ```
 
-> 注意：本地 `npm run dev` 不受 `base` 影响（默认空），照常 `http://localhost:4321` 预览。
+> 本地 `npm run dev` 不受 `base` 影响，照常 `http://localhost:4321` 预览。
 
 ---
 
@@ -235,6 +226,6 @@ Obsidian 负责**写**，这个站负责**发布**。
 
 - [x] 搜索（构建时生成索引 + 客户端匹配，零后端）
 - [x] 标签聚合页（按热度分组 + 相关标签共现）
+- [x] 订阅：诚实的 RSS 引导 + 可切换的第三方适配层
 - [ ] 图谱页（只读全站概览，优先级最低）
-- [x] 订阅：改为诚实的 RSS 引导 + 可切换的第三方适配层（见下）
 - [ ] 间距归一化（`设计规范.md` 里列的 6 个非阶梯值）
