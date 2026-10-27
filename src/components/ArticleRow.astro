@@ -1,0 +1,27 @@
+---
+// 文章/笔记列表行。右侧既可以放专栏名，也可以放成熟度徽章。
+import Chip from './Chip.astro';
+
+interface Props {
+  href: string;
+  date: Date;
+  title: string;
+  dek?: string;
+  tag?: string;
+  maturity?: 'seedling' | 'budding' | 'evergreen';
+}
+
+const { href, date, title, dek, tag, maturity } = Astro.props;
+const dateText = date.toISOString().slice(0, 10).replace(/-/g, '.');
+---
+
+<a class="article-row" href={href}>
+  <span class="article-row__date">{dateText}</span>
+  <div>
+    <h2 class="article-row__title">{title}</h2>
+    {dek && <p class="article-row__dek">{dek}</p>}
+  </div>
+  <span class="article-row__side">
+    {maturity ? <Chip maturity={maturity} /> : <span class="article-row__tag">{tag}</span>}
+  </span>
+</a>

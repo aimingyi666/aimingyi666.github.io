@@ -1,0 +1,33 @@
+---
+// 代码块：带语言标签与复制按钮
+// 注意 white-space: pre —— 这是保住缩进的唯一办法（见架构文档「实现坑记录」）
+
+interface Props {
+  lang?: string;
+  danger?: boolean;
+  code: string;
+}
+const { lang = 'bash', danger = false, code } = Astro.props;
+const lines = code.replace(/\n$/, '').split('\n');
+---
+
+<div class:list={['code', danger && 'code--danger']}>
+  <div class="code__head">
+    <span class="code__lang">{lang}{danger ? ' · 破坏性' : ''}</span>
+    <button class="code__copy" type="button">
+      <svg viewBox="0 0 12 12" fill="none" aria-hidden="true">
+        <rect x="1.5" y="1.5" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.2" />
+        <path d="M4 10.5H9.5C10.05 10.5 10.5 10.05 10.5 9.5V4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+      </svg>
+      <span>复制</span>
+    </button>
+  </div>
+  <div class="code__body">
+    <pre>{lines.map((line) => {
+      // 以 # 开头的行当注释，以 ! 开头的当危险行
+      if (line.trimStart().startsWith('#')) return <span class="c">{line + '\n'}</span>;
+      if (line.trimStart().startsWith('!')) return <span class="w">{line.slice(1) + '\n'}</span>;
+      return line + '\n';
+    })}</pre>
+  </div>
+</div>

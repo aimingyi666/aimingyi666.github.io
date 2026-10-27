@@ -1,0 +1,164 @@
+---
+// 基础布局：head / header / footer / drawer 只在这里出现一次
+import { SITE, withBase } from '../data/site';
+
+// 全局样式：顺序不能变（tokens → base → components → content → toolbox）
+import '../styles/tokens.css';
+import '../styles/base.css';
+import '../styles/components.css';
+import '../styles/content.css';
+import '../styles/toolbox.css';
+
+import Subscribe from '../components/Subscribe.astro';
+import { canSubscribe } from '../data/subscribe';
+
+interface Props {
+  title?: string;
+  description?: string;
+  current?: string;        // 当前导航项，用于 aria-current
+  ogType?: string;
+}
+
+const {
+  title,
+  description = SITE.description,
+  current = '',
+  ogType = 'website',
+} = Astro.props;
+
+const fullTitle = title ? `${title} · ${SITE.name}` : `${SITE.name} · 把学到的零散东西连成一张能用的网`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+
+const NAV = [
+  { key: 'columns', label: '专栏', href: '/columns/' },
+  { key: 'collections', label: '专题', href: '/collections/' },
+  { key: 'notes', label: '笔记', href: '/notes/' },
+  { key: 'toolbox', label: '工具库', href: '/toolbox/' },
+  { key: 'tags', label: '标签', href: '/tags/' },
+  { key: 'about', label: '关于', href: '/about/' },
+];
+---
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  {/*
+    把部署子路径（base）暴露给原生 JS（search.js 在 public/ 下，Vite 不会处理它，
+    拿不到 import.meta.env）。这里用普通 module script（会被 Vite 处理，import.meta.env 可用），
+    它在 <head> 里、早于 body 末尾 defer 的 search.js，所以 __BASE__ 一定先就位。
+  */}
+  <script>window.__BASE__ = import.meta.env.BASE_URL;</script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{fullTitle}</title>
+  <meta name="description" content={description} />
+  <link rel="canonical" href={canonical} />
+
+  <meta property="og:type" content={ogType} />
+  <meta property="og:title" content={fullTitle} />
+  <meta property="og:description" content={description} />
+  <meta property="og:url" content={canonical} />
+
+  <link rel="alternate" type="application/rss+xml" title={SITE.name} href={withBase('/rss.xml')} />
+</head>
+<body>
+
+<header class="masthead">
+  <div class="container masthead__inner">
+    <a class="brand" href={withBase('/')}>
+      <span class="brand__mark" aria-hidden="true"></span>
+      <span class="brand__name">{SITE.name}</span>
+    </a>
+
+    <div class="masthead__right">
+      <nav class="nav" aria-label="主导航">
+        {NAV.map((item) => (
+          <a
+            class="nav__link"
+            href={withBase(item.href)}
+            aria-current={current === item.key ? 'page' : undefined}
+          >{item.label}</a>
+        ))}
+      </nav>
+
+      <div class="masthead__actions">
+        <a class="icon-btn" href={withBase('/search/')} aria-label="搜索">
+          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.5" />
+            <path d="M13.4 13.4L17 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+          </svg>
+        </a>
+        <a class="btn btn--primary" href={canSubscribe ? '#subscribe' : withBase('/rss.xml')}>订阅</a>
+
+        <button class="nav-toggle" type="button" id="navToggle"
+                aria-expanded="false" aria-controls="drawer" aria-label="打开导航">
+          <svg viewBox="0 0 22 22" fill="none" aria-hidden="true">
+            <path d="M3 6h16M3 11h16M3 16h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="drawer" id="drawer" hidden>
+  {NAV.map((item) => (
+    <a class="drawer__link" href={withBase(item.href)}>
+      {item.label}
+      <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </a>
+  ))}
+  <div class="drawer__foot">
+    <a class="btn btn--primary" href={canSubscribe ? '#subscribe' : withBase('/rss.xml')}>{canSubscribe ? '订阅更新' : '订阅 RSS'}</a>
+    <p class="meta">不定期更新 · 一篇长文一次 · 不发广告</p>
+  </div>
+</div>
+
+<main>
+  <slot />
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer__top">
+      <div class="footer__brand">
+        <p class="footer__name">{SITE.name}</p>
+        <p class="footer__tagline">{SITE.tagline}</p>
+        <Subscribe compact />
+      </div>
+      <div class="footer__cols">
+        <div class="footer__col">
+          <p class="footer__col-title">浏览</p>
+          <a class="footer__link" href={withBase('/columns/')}>专栏</a>
+          <a class="footer__link" href={withBase('/collections/')}>专题</a>
+          <a class="footer__link" href={withBase('/notes/')}>文章</a>
+          <a class="footer__link" href={withBase('/log/')}>日志</a>
+        </div>
+        <div class="footer__col">
+          <p class="footer__col-title">关于</p>
+          <a class="footer__link" href={withBase('/about/')}>关于本站</a>
+          <a class="footer__link" href={canSubscribe ? '#subscribe' : withBase('/rss.xml')}>订阅</a>
+          <a class="footer__link" href={withBase('/rss.xml')}>RSS 订阅</a>
+        </div>
+        <div class="footer__col">
+          <p class="footer__col-title">联系</p>
+          <a class="footer__link" href={`mailto:${SITE.email}`}>{SITE.email}</a>
+          <a class="footer__link" href={`mailto:${SITE.email}?subject=内容纠错`}>内容纠错</a>
+        </div>
+      </div>
+    </div>
+
+    <p class="footer__wordmark" aria-hidden="true">{SITE.name}</p>
+
+    <div class="footer__bottom">
+      <p class="footer__legal">2026 {SITE.name} · 版权所有 · 内容采用 CC BY-NC-SA 4.0 授权</p>
+      <p class="footer__sig">Slow Variable · Est. 2026</p>
+    </div>
+  </div>
+</footer>
+
+<script src={withBase('/site.js')} defer></script>
+</body>
+</html>

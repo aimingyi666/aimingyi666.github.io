@@ -1,0 +1,657 @@
+/* ==========================================================================
+   content.css —— 内页组件（专题页 / 文章页 / 笔记页 共用）
+   ========================================================================== */
+
+/* ---------- 面包屑 ---------- */
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding-block: 24px 0;
+  font-size: 12px;
+  color: var(--faint);
+  flex-wrap: wrap;
+}
+.breadcrumb a { color: var(--faint); }
+.breadcrumb a:hover { color: var(--navy); }
+.breadcrumb svg { width: 10px; height: 10px; color: var(--line-strong); flex: none; }
+.breadcrumb__current { color: var(--body); }
+
+/* ---------- 内页页头 ---------- */
+
+.page-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s5);
+  padding-block: var(--s6) var(--s7);
+}
+
+.page-head__chips {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.page-head__title {
+  font-size: clamp(32px, 4.2vw, 48px);
+  line-height: 1.42;
+  letter-spacing: -0.01em;
+}
+
+.page-head__dek {
+  font-size: 19px;
+  line-height: 1.79;
+  color: var(--body);
+  max-width: 760px;
+}
+
+.page-head__meta {
+  font-size: 12px;
+  letter-spacing: 0.4px;
+  color: var(--faint);
+}
+.page-head__meta span + span::before {
+  content: "·";
+  margin-inline: 0.6em;
+  color: var(--line-strong);
+}
+
+/* ---------- 专题进度 ---------- */
+
+.progress {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: var(--s1);
+}
+.progress__track {
+  width: 320px;
+  max-width: 55vw;
+  height: 2px;
+  background: var(--line);
+  flex: none;
+}
+.progress__fill {
+  height: 2px;
+  background: var(--navy);
+  display: block;
+}
+.progress__label {
+  font-size: 11px;
+  color: var(--faint);
+  white-space: nowrap;
+}
+
+/* ---------- 两栏布局：正文 + 侧栏 ---------- */
+
+.layout-rail {
+  display: grid;
+  grid-template-columns: minmax(0, 720px) var(--rail);
+  gap: var(--s11);
+  justify-content: space-between;
+  align-items: start;
+  padding-bottom: var(--s10);
+}
+
+/* ---------- 正文排版 ---------- */
+
+.prose { font-size: 17px; line-height: 1.88; color: var(--ink); }
+
+.prose p + p { margin-top: 24px; }
+
+.prose h2 {
+  font-size: 24px;
+  line-height: 1.5;
+  margin-block: var(--s7) 24px;
+}
+.prose h2:first-child { margin-top: 0; }
+
+.prose a { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+
+.prose ul, .prose ol { margin-block: 24px; padding-left: 1.4em; }
+.prose ul { list-style: disc; }
+.prose ol { list-style: decimal; }
+.prose li + li { margin-top: 12px; }
+.prose li::marker { color: var(--line-strong); }
+
+.prose code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--tint);
+  padding: 2px 4px;
+  border-radius: var(--radius);
+}
+
+/* ---------- 代码块 ---------- */
+
+.code {
+  margin-block: var(--s5);
+  background: var(--code-bg);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.code__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s4);
+  padding: 8px 16px;
+  background: var(--code-head);
+}
+
+.code__lang {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--code-comment);
+}
+
+.code__copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--ink-text-dim);
+  transition: color var(--dur) var(--ease);
+}
+.code__copy:hover { color: var(--paper); }
+.code__copy svg { width: 12px; height: 12px; }
+
+.code__body {
+  padding: 16px 16px;
+  overflow-x: auto;          /* 长命令横向滚动，不换行破坏对齐 */
+}
+
+.code pre {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 22px;
+  color: var(--code-text);
+  white-space: pre;          /* 关键：保住缩进 */
+  tab-size: 2;
+}
+
+.code .c { color: var(--code-comment); }   /* 注释 */
+.code .w { color: var(--code-warn); }      /* 危险行 */
+.code .k { color: var(--code-key); }       /* 关键字 */
+
+/* ---------- 引文块 ---------- */
+
+.pullquote { margin-block: var(--s8); }
+.pullquote::before {
+  content: "";
+  display: block;
+  width: 48px;
+  height: 3px;
+  background: var(--navy);
+  margin-bottom: 16px;
+}
+.pullquote p {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.73;
+}
+
+/* ---------- 侧栏 ---------- */
+
+.rail {
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 96px;
+}
+
+.rail__block {
+  padding-block: 16px;
+  border-top: var(--border) solid var(--line);
+}
+.rail__block:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+.rail__block:last-child { padding-bottom: 0; }
+
+.rail__label {
+  font-family: var(--font-latin);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  color: var(--brown);
+  text-transform: uppercase;
+  margin-bottom: var(--s3);
+}
+
+.rail__link {
+  display: block;
+  font-size: 13px;
+  line-height: 1.6;
+  font-weight: 500;
+  color: var(--navy);
+}
+.rail__note {
+  font-size: 11px;
+  line-height: 1.73;
+  color: var(--faint);
+  margin-top: var(--s2);
+}
+
+/* ---------- 目录 ---------- */
+
+.toc { display: flex; flex-direction: column; }
+
+.toc__item {
+  display: flex;
+  gap: var(--s2);
+  padding-block: 4px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+  transition: color var(--dur) var(--ease);
+}
+.toc__item::before {
+  content: "";
+  width: 3px;
+  flex: none;
+  align-self: stretch;
+  min-height: 14px;
+  background: transparent;
+  border-radius: 1px;
+}
+.toc__item:hover { color: var(--ink); }
+.toc__item.is-active { color: var(--ink); font-weight: 500; }
+.toc__item.is-active::before { background: var(--navy); }
+
+/* ---------- 有序列表（专题页） ---------- */
+
+.ordered-list { border-top: var(--border) solid var(--line); }
+
+.ordered-item {
+  display: grid;
+  grid-template-columns: 44px 1fr 110px;
+  gap: 24px;
+  padding-block: 24px;
+  border-bottom: var(--border) solid var(--line);
+  color: var(--ink);
+}
+.ordered-item:hover { color: var(--ink); }
+.ordered-item:hover .ordered-item__title { color: var(--navy); }
+
+.ordered-item__num {
+  font-family: var(--font-serif);
+  font-size: 26px;
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+  color: var(--navy);
+}
+/* 未读的序号变浅，已读保持深蓝 —— 进度不靠文字也看得出来 */
+.ordered-item.is-unread .ordered-item__num { color: var(--numeral); }
+
+.ordered-item__title {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.5;
+  transition: color var(--dur) var(--ease);
+}
+
+.ordered-item__meta {
+  font-size: 11px;
+  color: var(--faint);
+  text-align: right;
+  line-height: 2;
+}
+
+.list-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--s5);
+  padding-bottom: var(--s3);
+  flex-wrap: wrap;
+}
+.list-head__hint { font-size: 11px; color: var(--faint); }
+
+/* ---------- 上一篇 / 下一篇 ---------- */
+
+.pager {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  padding-block: 24px var(--s10);
+  border-top: var(--border) solid var(--line);
+}
+.pager__label {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  color: var(--faint);
+  margin-bottom: var(--s2);
+}
+.pager__title {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.pager__item--next { text-align: right; }
+
+/* ---------- 读完之后（关联专题） ---------- */
+
+.related {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: var(--s11);
+  padding-block: 24px var(--s10);
+  border-top: var(--border) solid var(--line);
+}
+.related__links {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s9);
+}
+.related__title {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.6;
+  color: var(--navy);
+  display: block;
+  margin-bottom: 8px;
+}
+.related__meta { font-size: 11px; color: var(--faint); }
+
+/* ---------- 响应式 ---------- */
+
+@media (max-width: 1100px) {
+  .layout-rail {
+    grid-template-columns: 1fr;
+    gap: var(--s9);
+  }
+  /* 侧栏在窄屏变成正文下方的一横排信息 */
+  .rail { position: static; }
+  .related { grid-template-columns: 1fr; gap: var(--s5); }
+}
+
+@media (max-width: 900px) {
+  .ordered-item { grid-template-columns: 36px 1fr; gap: var(--s4); }
+  .ordered-item__meta { grid-column: 2; text-align: left; line-height: 1.6; }
+  .pager { grid-template-columns: 1fr; gap: var(--s6); }
+  .pager__item--next { text-align: left; }
+  .related__links { grid-template-columns: 1fr; gap: var(--s5); }
+}
+
+@media (max-width: 640px) {
+  .page-head__dek { font-size: 17px; }
+  .prose { font-size: 16px; }
+  .prose h2 { font-size: 21px; }
+  .pullquote p { font-size: 19px; }
+  .code pre { font-size: 12px; line-height: 20px; }
+  .progress__track { width: 200px; }
+}
+
+/* ==========================================================================
+   笔记页专用：反向链接 / 出链 / 标签
+   ========================================================================== */
+
+/* 反向链接条目：标题 + 一句「它是怎么引用我的」 */
+.backlink {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-block: 8px;
+}
+.backlink__title {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.55;
+  color: var(--ink);
+  transition: color var(--dur) var(--ease);
+}
+.backlink:hover .backlink__title { color: var(--navy); }
+.backlink__ctx {
+  font-size: 11px;
+  line-height: 1.64;
+  color: var(--faint);
+}
+
+/* 标签行 */
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+}
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border: var(--border) solid var(--line-chip);
+  border-radius: var(--radius);
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--muted);
+  transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.tag:hover { color: var(--navy); border-color: var(--line-strong); }
+
+/* 列表右侧放徽章时的对齐容器 */
+.article-row__side { text-align: right; }
+
+/* ==========================================================================
+   关于页
+   ========================================================================== */
+
+.about-body {
+  max-width: 760px;
+  padding-bottom: var(--s10);
+}
+
+.about-body h2 {
+  font-size: 24px;
+  line-height: 1.5;
+  margin-block: var(--s7) 16px;
+}
+.about-body h2:first-of-type { margin-top: var(--s5); }
+
+.about-body p + p { margin-top: 16px; }
+
+.about-body ul {
+  margin-block: 16px;
+  padding-left: 0;
+  list-style: none;
+}
+.about-body li {
+  position: relative;
+  padding-left: 24px;
+  font-size: 17px;
+  line-height: 1.88;
+}
+.about-body li + li { margin-top: 12px; }
+.about-body li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.78em;
+  width: 12px;
+  height: 1px;
+  background: var(--brown);
+}
+
+.about-body strong { font-weight: 500; color: var(--ink); }
+
+/* 与 .prose 保持一致：正文里的链接必须有下划线，不能只靠颜色 */
+.about-body a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+.about-body .muted-line {
+  font-size: 15px;
+  line-height: 1.87;
+  color: var(--muted);
+}
+
+@media (max-width: 640px) {
+  .about-body li { font-size: 16px; }
+  .about-body h2 { font-size: 21px; }
+}
+
+/* ==========================================================================
+   Markdown 渲染的代码块（Shiki 输出 .astro-code）
+   —— 与手写 .code 组件视觉一致，但不需要额外的表头容器
+   ========================================================================== */
+
+.prose pre.astro-code {
+  margin-block: var(--s5);
+  padding: 16px 16px;
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 22px;
+  overflow-x: auto;
+  border: 0;
+  /* 背景与前景由 Shiki 行内样式接管，这里只保证字体和间距 */
+}
+
+.prose pre.astro-code code {
+  font-family: var(--font-mono);
+  font-size: inherit;
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  white-space: pre;
+}
+
+/* 行内代码 */
+.prose :not(pre) > code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--tint);
+  padding: 2px 4px;
+  border-radius: var(--radius);
+  color: var(--ink);
+}
+
+/* 引用块（Markdown 的 >） */
+.prose blockquote {
+  margin-block: var(--s7);
+  padding-left: 24px;
+  border-left: 3px solid var(--navy);
+}
+.prose blockquote p {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.75;
+  color: var(--ink);
+}
+
+/* 表格 */
+.prose table {
+  width: 100%;
+  margin-block: var(--s5);
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.prose th {
+  text-align: left;
+  font-weight: 500;
+  padding: 12px 12px 12px 0;
+  border-bottom: var(--border) solid var(--line-strong);
+  color: var(--muted);
+}
+.prose td {
+  padding: 12px 12px 12px 0;
+  border-bottom: var(--border) solid var(--line);
+  vertical-align: top;
+}
+
+@media (max-width: 640px) {
+  .prose pre.astro-code { font-size: 12px; line-height: 20px; padding: 12px 16px; }
+  .prose blockquote p { font-size: 18px; }
+  .prose table { font-size: 13px; }
+}
+
+/* ==========================================================================
+   Markdown 渲染的代码块（Shiki 输出 .astro-code）
+   —— 与手写 .code 组件视觉一致，但不需要额外的表头容器
+   ========================================================================== */
+
+.prose pre.astro-code {
+  margin-block: var(--s5);
+  padding: 16px 16px;
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 22px;
+  overflow-x: auto;
+  border: 0;
+  /* 背景与前景由 Shiki 行内样式接管，这里只保证字体和间距 */
+}
+
+.prose pre.astro-code code {
+  font-family: var(--font-mono);
+  font-size: inherit;
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  white-space: pre;
+}
+
+/* 行内代码 */
+.prose :not(pre) > code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--tint);
+  padding: 2px 4px;
+  border-radius: var(--radius);
+  color: var(--ink);
+}
+
+/* 引用块（Markdown 的 >） */
+.prose blockquote {
+  margin-block: var(--s7);
+  padding-left: 24px;
+  border-left: 3px solid var(--navy);
+}
+.prose blockquote p {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.75;
+  color: var(--ink);
+}
+
+/* 表格 */
+.prose table {
+  width: 100%;
+  margin-block: var(--s5);
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.prose th {
+  text-align: left;
+  font-weight: 500;
+  padding: 12px 12px 12px 0;
+  border-bottom: var(--border) solid var(--line-strong);
+  color: var(--muted);
+}
+.prose td {
+  padding: 12px 12px 12px 0;
+  border-bottom: var(--border) solid var(--line);
+  vertical-align: top;
+}
+
+@media (max-width: 640px) {
+  .prose pre.astro-code { font-size: 12px; line-height: 20px; padding: 12px 16px; }
+  .prose blockquote p { font-size: 18px; }
+  .prose table { font-size: 13px; }
+}
+
+/* Shiki 输出里没有「危险行」语义，用 data-line 属性做标记太脆弱；
+   改为在 Markdown 里用 ! 前缀 + 后处理：见 CodeBlock.astro。
+   Markdown 渲染的代码块靠 Shiki 主题色，这里只处理手工组件。 */

@@ -1,0 +1,24 @@
+{
+  "name": "slow-variable",
+  "version": "1.0.0",
+  "description": "慢变量 —— 个人知识库：笔记、专题、工具库",
+  "main": "index.js",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "audit": "python audit-links.py",
+    "check": "astro build && python audit-links.py",
+    "new": "python new-post.py",
+    "fix": "python normalize-spacing.py"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "astro": "^5.18.2"
+  },
+  "dependencies": {
+    "@astrojs/rss": "^4.0.19"
+  }
+}

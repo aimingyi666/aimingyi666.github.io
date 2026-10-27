@@ -1,0 +1,12 @@
+---
+// 成熟度徽章：三档，只渲染已发布的
+import { MATURITY_LABEL } from '../data/site';
+
+interface Props {
+  maturity: 'seedling' | 'budding' | 'evergreen';
+}
+const { maturity } = Astro.props;
+const m = MATURITY_LABEL[maturity];
+---
+
+<span class:list={['chip', m.cls]}>{m.text}</span>

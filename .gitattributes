@@ -1,0 +1,2 @@
+# 统一用 LF 换行，保证 Linux CI 与本地行为一致
+* text=auto eol=lf

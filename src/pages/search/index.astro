@@ -1,0 +1,89 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import { COLUMNS, COLLECTIONS, withBase } from '../../data/site';
+import '../../styles/search.css';
+
+// 建议词：从专题名和专栏名里抽，不硬编码
+const collectionHints = COLLECTIONS.map((c) => ({
+  q: c.name.split('：')[0],
+  label: c.name.split('：')[0],
+}));
+
+const termHints = [
+  { q: '显存', label: '显存' },
+  { q: '幂等', label: '幂等' },
+  { q: '上下文', label: '上下文' },
+  { q: '代理', label: '代理' },
+  { q: 'Docker', label: 'Docker' },
+  { q: '备份', label: '备份' },
+  { q: 'NUMA', label: 'NUMA' },
+  { q: '测评', label: '评测' },
+];
+---
+
+<Base title="搜索" description="搜索笔记、专题与工具库。">
+  <div class="container">
+    <Breadcrumb items={[{ label: '首页', href: '/' }, { label: '搜索' }]} />
+
+    <div class="search-page">
+      <header class="search-page__head">
+        <p class="kicker">Search</p>
+        <h1 class="search-page__title">搜索</h1>
+
+        <form class="search-large" id="searchForm" role="search" onsubmit="return false">
+          <label class="visually-hidden" for="sq">搜索关键词</label>
+          <input id="sq" type="search" placeholder="笔记、专题、命令……" autocomplete="off" autofocus />
+          <span class="search-large__hint">ENTER 搜索</span>
+        </form>
+      </header>
+
+      <div class="filters" id="filters"></div>
+
+      <p class="result-meta" id="resultMeta"></p>
+
+      <div id="suggest" class="suggest">
+        <div>
+          <p class="suggest__title">按专题</p>
+          <div class="suggest__items">
+            {collectionHints.map((h) => (
+              <button class="suggest__item" type="button" data-q={h.q}>{h.label}</button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <p class="suggest__title">常用词</p>
+          <div class="suggest__items">
+            {termHints.map((h) => (
+              <button class="suggest__item" type="button" data-q={h.q}>{h.label}</button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <p class="suggest__title">按专栏</p>
+          <div class="suggest__items">
+            {COLUMNS.map((c) => (
+              <button class="suggest__item" type="button" data-q={c.name}>{c.name}</button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <p class="suggest__title">直达</p>
+          <div class="suggest__items">
+            <a class="suggest__item" href={withBase('/toolbox/')}>工具库</a>
+            <a class="suggest__item" href={withBase('/collections/')}>专题合集</a>
+            <a class="suggest__item" href={withBase('/notes/')}>全部笔记</a>
+            <a class="suggest__item" href={withBase('/log/')}>日志</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="result-list" id="results"></div>
+    </div>
+  </div>
+
+  <script src={withBase('/search.js')} defer></script>
+</Base>

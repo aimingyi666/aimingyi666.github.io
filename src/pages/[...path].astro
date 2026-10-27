@@ -1,0 +1,228 @@
+---
+// 内容详情页：文章 / 笔记 / 工具条目 / 日志，共用一套模板
+// 路径规则与 urlFor() 完全一致 —— 两边不一致会导致死链，所以这里直接复用
+import Base from '../layouts/Base.astro';
+import Chip from '../components/Chip.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import RiskBadge from '../components/RiskBadge.astro';
+import VerifyLine from '../components/VerifyLine.astro';
+import { COLLECTIONS, GENRE_LABEL, columnName, MATURITY_LABEL, TASKS, withBase } from '../data/site';
+import { published, inCollection, backlinks, urlFor, linkFor } from '../data/content';
+import { getEntry, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const all = await published();
+  return all.map((n) => ({
+    params: { path: urlFor(n).replace(/^\/|\/$/g, '') },
+    props: { id: n.id },
+  }));
+}
+
+interface Props { id: string }
+const { id } = Astro.props;
+
+const entry = (await getEntry('notes', id))!;
+const d = entry.data;
+const { Content, headings } = await render(entry);
+
+// 目录只留 h2
+const toc = (headings ?? []).filter((h) => h.depth === 2);
+
+const coll = d.collection ? COLLECTIONS.find((c) => c.slug === d.collection) : null;
+const siblings = coll ? await inCollection(coll.slug) : [];
+const idx = siblings.findIndex((x) => x.id === id);
+const prev = idx > 0 ? siblings[idx - 1] : null;
+const next = idx >= 0 && idx < siblings.length - 1 ? siblings[idx + 1] : null;
+
+const incoming = await backlinks(id);
+
+const outgoingRaw = await Promise.all(
+  d.links.map(async (s) => {
+    const e = await getEntry('notes', s);
+    if (!e || e.data.draft) return null;
+    if (e.data.genre === 'log') return e;
+    return MATURITY_LABEL[e.data.maturity].publish ? e : null;
+  })
+);
+const outgoing = outgoingRaw.filter(Boolean);
+
+const isTool = Boolean(d.risk);
+const isLog = d.genre === 'log';
+
+const dateText = d.date.toISOString().slice(0, 10).replace(/-/g, '.');
+const minutes = Math.max(3, Math.round((entry.body?.length ?? 0) / 350));
+
+const crumb = isTool
+  ? [{ label: '首页', href: '/' }, { label: '工具库', href: '/toolbox/' }, { label: d.title }]
+  : isLog
+  ? [{ label: '首页', href: '/' }, { label: '日志', href: '/log/' }, { label: '日志' }]
+  : d.collection && coll
+  ? [
+      { label: '首页', href: '/' },
+      { label: '专题', href: '/collections/' },
+      { label: coll.name, href: `/collections/${coll.slug}/` },
+      { label: d.title },
+    ]
+  : [{ label: '首页', href: '/' }, { label: '笔记', href: '/notes/' }, { label: d.title }];
+---
+
+<Base
+  title={d.title}
+  description={d.summary ?? ''}
+  current={isTool ? 'toolbox' : d.collection ? 'collections' : isLog ? 'notes' : 'notes'}
+  ogType="article"
+>
+  <div class="container">
+    <Breadcrumb items={crumb} />
+
+    <header class="page-head">
+      <div class="page-head__chips">
+        {!isLog && <Chip maturity={d.maturity} />}
+        <span class="chip chip--outline">{GENRE_LABEL[d.genre]}</span>
+        {isTool && d.risk && <RiskBadge risk={d.risk} />}
+      </div>
+
+      <h1 class="page-head__title">{d.title}</h1>
+      {d.summary && <p class="page-head__dek">{d.summary}</p>}
+
+      <p class="page-head__meta">
+        <span>{dateText}</span>
+        {!isTool && <span>阅读 {minutes} 分钟</span>}
+        {coll && idx >= 0 && <span>第 {idx + 1} 篇 / 共 {siblings.length} 篇</span>}
+        {incoming.length > 0 && <span>{incoming.length} 条笔记引用了它</span>}
+      </p>
+
+      {isTool && d.verified && (
+        <VerifyLine status={d.verified.status} env={d.verified.env} date={d.verified.date} />
+      )}
+
+      {isTool && d.risk === 'danger' && (
+        <div class="risk-warning" role="note">
+          <svg viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <path d="M7 1.6L12.4 11.4H1.6L7 1.6Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" />
+            <path d="M7 5.4V7.8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+            <circle cx="7" cy="9.6" r="0.7" fill="currentColor" />
+          </svg>
+          <span>破坏性操作 · 不可撤销。执行前先确认没有生产环境依赖，并准备好回滚方式。</span>
+        </div>
+      )}
+    </header>
+
+    <div class="layout-rail">
+      <article class="prose">
+        <Content />
+      </article>
+
+      {!isLog && (
+        <aside class="rail" aria-label="内容信息">
+          {toc.length > 0 && (
+            <div class="rail__block">
+              <p class="rail__label">目录</p>
+              <nav class="toc">
+                {toc.map((h, i) => (
+                  <a class:list={['toc__item', i === 0 && 'is-active']} href={`#${h.slug}`}>{h.text}</a>
+                ))}
+              </nav>
+            </div>
+          )}
+
+          {isTool ? (
+            <>
+              <div class="rail__block">
+                <p class="rail__label">任务分类</p>
+                <p class="rail__note" style="margin-top:0">
+                  {TASKS.find((t) => t.slug === d.task)?.name ?? '未分类'}
+                </p>
+              </div>
+
+              {d.source && (
+                <div class="rail__block">
+                  <p class="rail__label">来源</p>
+                  {d.source.url
+                    ? <a class="rail__link" href={d.source.url} target="_blank" rel="noopener noreferrer">
+                        {d.source.author ?? d.source.url}
+                      </a>
+                    : <p class="rail__note" style="margin-top:0">{d.source.author ?? '未记录'}</p>}
+                  <p class="rail__note">
+                    {d.source.license ? `${d.source.license}　` : ''}{d.source.change ?? ''}
+                  </p>
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              <div class="rail__block">
+                <p class="rail__label">成熟度</p>
+                <p class="rail__note" style="margin-top:0">
+                  {d.maturity === 'evergreen'
+                    ? '已成体系 —— 可交付，敢让人照做。'
+                    : '生长中 —— 有结构，但案例与验证还不完整。可以看思路，结论待验证。'}
+                </p>
+              </div>
+
+              {coll && (
+                <div class="rail__block">
+                  <p class="rail__label">所属专题</p>
+                  <a class="rail__link" href={withBase(`/collections/${coll.slug}/`)}>{coll.name}</a>
+                  <p class="rail__note">第 {idx + 1} 篇 / 共 {siblings.length} 篇</p>
+                </div>
+              )}
+            </>
+          )}
+
+          {d.tags.length > 0 && (
+            <div class="rail__block">
+              <p class="rail__label">标签</p>
+              <div class="tag-row">
+                {d.tags.map((t) => (
+                  <a class="tag" href={withBase(`/tags/${encodeURIComponent(t)}/`)}>#{t}</a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {incoming.length > 0 && (
+            <div class="rail__block">
+              <p class="rail__label">被 {incoming.length} 条笔记引用</p>
+              {incoming.map((n) => (
+                <a class="backlink" href={linkFor(n)}>
+                  <span class="backlink__title">{n.data.title}</span>
+                  <span class="backlink__ctx">{n.data.summary ?? '引用了这条笔记'}</span>
+                </a>
+              ))}
+            </div>
+          )}
+
+          {outgoing.length > 0 && (
+            <div class="rail__block">
+              <p class="rail__label">指向 {outgoing.length} 条笔记</p>
+              {outgoing.map((n) => (
+                <a class="backlink" href={linkFor(n!)}>
+                  <span class="backlink__title">{n!.data.title}</span>
+                  <span class="backlink__ctx">{n!.data.summary ?? ''}</span>
+                </a>
+              ))}
+            </div>
+          )}
+        </aside>
+      )}
+    </div>
+
+    {coll && (prev || next) && (
+      <nav class="pager" aria-label="专题内翻页">
+        {prev ? (
+          <a class="pager__item" href={linkFor(prev)}>
+            <p class="pager__label">上一篇</p>
+            <p class="pager__title">{prev.data.title}</p>
+          </a>
+        ) : <span></span>}
+        {next ? (
+          <a class="pager__item pager__item--next" href={linkFor(next)}>
+            <p class="pager__label">下一篇</p>
+            <p class="pager__title">{next.data.title}</p>
+          </a>
+        ) : <span></span>}
+      </nav>
+    )}
+  </div>
+</Base>

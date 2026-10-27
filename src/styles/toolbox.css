@@ -1,0 +1,250 @@
+/* ==========================================================================
+   toolbox.css —— 工具库页专用组件
+   设计原则：这一页是「用」的页面，不是「读」的页面。
+   信息密度比文章页高，条目用细线分隔而不是卡片。
+   ========================================================================== */
+
+/* ---------- 页头（标题 + 搜索并排） ---------- */
+
+.tool-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--s11);
+  padding-block: var(--s7) var(--s9);
+  flex-wrap: wrap;
+}
+
+.tool-head__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+}
+
+.tool-head__title {
+  font-size: clamp(34px, 4.4vw, 52px);
+  line-height: 1.24;
+}
+
+.tool-head__desc {
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--body);
+  max-width: 640px;
+}
+
+.tool-head .search {
+  width: min(380px, 100%);
+  height: 50px;
+  flex: none;
+}
+
+/* ---------- 两栏：任务导航 + 条目 ---------- */
+
+.tool-layout {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: 72px;
+  align-items: start;
+  padding-bottom: var(--s10);
+}
+
+/* ---------- 任务导航（按动词分类） ---------- */
+
+.task-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s1);
+  position: sticky;
+  top: 96px;
+}
+
+.task-nav__label {
+  font-family: var(--font-latin);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  color: var(--brown);
+  text-transform: uppercase;
+  margin-bottom: var(--s2);
+}
+
+.task-nav__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-block: 8px;
+  font-size: 13px;
+  color: var(--muted);
+  transition: color var(--dur) var(--ease);
+}
+.task-nav__item:hover { color: var(--ink); }
+
+/* 当前项：左侧 5px 方点 + 深色字 + 棕色计数 */
+.task-nav__item::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  flex: none;
+  background: transparent;
+}
+.task-nav__item.is-active { color: var(--ink); font-weight: 500; }
+.task-nav__item.is-active::before { background: var(--navy); }
+
+.task-nav__count {
+  margin-left: auto;
+  font-family: var(--font-latin);
+  font-size: 11px;
+  color: var(--faint);
+}
+.task-nav__item.is-active .task-nav__count { color: var(--brown); }
+
+/* ---------- 条目列表 ---------- */
+
+.tool-list { border-top: var(--border) solid var(--line); }
+
+.tool-item {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-block: 24px;
+  border-bottom: var(--border) solid var(--line);
+}
+
+.tool-item__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s4);
+  flex-wrap: wrap;
+}
+
+.tool-item__name {
+  font-family: var(--font-sans);
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--ink);
+  margin: 0;
+}
+
+.tool-item__purpose {
+  font-size: 14px;
+  line-height: 1.71;
+  color: var(--body);
+}
+
+/* ---------- 环境 / 验证行 ----------
+   验证状态不单独做徽章，直接和环境写在一起。
+   这样「实测通过」必须带上「在什么环境」才能出现。 */
+
+.tool-item__env {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.tool-item__env-label {
+  width: 40px;
+  flex: none;
+  color: var(--faint);
+}
+
+.tool-item__env-value { color: var(--muted); }
+.tool-item__env-value--untested { color: var(--red); }
+
+/* ---------- 风险徽章 ---------- */
+
+.risk {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: var(--radius);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+.risk--safe   { background: var(--safe-bg); color: var(--green); }
+.risk--backup { background: var(--brown-bg); color: var(--brown); }
+.risk--danger { background: var(--red-bg); color: var(--red); }
+
+/* ---------- 破坏性警示行 ----------
+   危险命令必须在命令块之前拦住人，而不是只在标题旁标个红字 */
+
+.risk-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s2);
+  padding: 12px 16px;
+  background: var(--red-bg-soft);
+  border-radius: var(--radius);
+  font-size: 12px;
+  line-height: 1.75;
+  color: var(--red);
+}
+.risk-warning svg { width: 14px; height: 14px; flex: none; margin-top: 3px; }
+
+/* ---------- 命令块：危险态表头 ---------- */
+
+.code--danger .code__head { background: var(--code-head-danger); }
+.code--danger .code__lang { color: var(--code-danger-lang); }
+
+/* ---------- 条目底部：来源 + 关联笔记 ---------- */
+
+.tool-item__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s4);
+  flex-wrap: wrap;
+}
+
+.tool-item__source {
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--faint);
+}
+
+.tool-item__rel {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--navy);
+}
+.tool-item__rel:hover { color: var(--ink); }
+
+/* ---------- 风险图例 ---------- */
+
+.risk-legend {
+  padding-top: 24px;
+  font-size: 11px;
+  letter-spacing: 0.3px;
+  color: var(--faint);
+}
+
+/* ---------- 响应式 ---------- */
+
+@media (max-width: 1100px) {
+  .tool-layout { grid-template-columns: 1fr; gap: var(--s7); }
+  .task-nav {
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--s2) var(--s5);
+    padding-bottom: var(--s5);
+    border-bottom: var(--border) solid var(--line);
+  }
+  .task-nav__label { width: 100%; margin-bottom: 0; }
+  .task-nav__item::before { display: none; }
+  .task-nav__count { margin-left: 8px; }
+}
+
+@media (max-width: 640px) {
+  .tool-head { gap: var(--s5); }
+  .tool-head .search { width: 100%; }
+  .tool-item__name { font-size: 17px; }
+  .tool-item__env { flex-direction: column; gap: 2px; }
+  .tool-item__env-label { width: auto; }
+  .code pre { font-size: 12px; line-height: 20px; }
+}

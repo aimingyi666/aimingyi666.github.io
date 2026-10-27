@@ -1,0 +1,67 @@
+---
+// 订阅区：根据 SUBSCRIBE.mode 自动切换行为
+// - 已接服务：真实表单，POST 到第三方
+// - 未接服务：禁用提交，明确告知，并给出 RSS 作为替代
+import { SUBSCRIBE, canSubscribe } from '../data/subscribe';
+import { withBase } from '../data/site';
+
+interface Props {
+  /** 紧凑版用于页脚，完整版用于首页 */
+  compact?: boolean;
+}
+const { compact = false } = Astro.props;
+
+const action = canSubscribe
+  ? SUBSCRIBE.mode === 'formspree'
+    ? SUBSCRIBE.endpoint
+    : SUBSCRIBE.endpoint
+  : undefined;
+---
+
+{compact ? (
+  <div class="sub-compact">
+    <p class="sub-compact__title">新专题发布时告诉你</p>
+    <p class="sub-compact__desc">不定期更新，一篇长文一次。</p>
+
+    {canSubscribe ? (
+      <form class="sub-compact__form" action={action} method="POST">
+        <label class="visually-hidden" for="email-footer">你的邮箱</label>
+        <input class="sub-compact__input" id="email-footer" name="email" type="email" placeholder="你的邮箱" required />
+        <button class="sub-compact__btn" type="submit">订阅</button>
+      </form>
+    ) : (
+      <a class="sub-compact__rss" href={withBase('/rss.xml')}>用 RSS 订阅 →</a>
+    )}
+  </div>
+) : (
+  <section class="subscribe" id="subscribe">
+    <div class="container subscribe__inner">
+      <p class="kicker">Subscribe</p>
+      <h2 class="subscribe__title">新专题发布时告诉你</h2>
+      <p class="subscribe__desc">不定期更新，一篇长文一次。不发广告，不转发别人的观点。</p>
+
+      {canSubscribe ? (
+        <form class="subscribe__form" action={action} method="POST" id="subForm">
+          <label class="visually-hidden" for="email">你的邮箱</label>
+          <input class="subscribe__input" id="email" name="email" type="email" placeholder="你的邮箱" required />
+          <button class="subscribe__submit" type="submit">订阅</button>
+        </form>
+      ) : (
+        <div class="subscribe__pending">
+          <p class="subscribe__pending-title">邮件订阅还没接通</p>
+          <p class="subscribe__pending-desc">
+            这个站没有后端服务器——没有数据库、没有追踪、也没有会存你邮箱的地方。
+            想第一时间看到更新，用 RSS 更合适。
+          </p>
+          <a class="btn btn--ghost subscribe__rss-btn" href={withBase('/rss.xml')}>订阅 RSS</a>
+        </div>
+      )}
+
+      {canSubscribe ? (
+        <p class="subscribe__helper">也可通过 RSS 订阅 · 随时可退订</p>
+      ) : (
+        <p class="subscribe__helper">RSS 不需要注册 · 不进邮箱 · 想看就看</p>
+      )}
+    </div>
+  </section>
+)}

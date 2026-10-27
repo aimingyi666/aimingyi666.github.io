@@ -1,0 +1,11 @@
+---
+import { RISK_LABEL } from '../data/site';
+
+interface Props {
+  risk: 'safe' | 'backup' | 'danger';
+}
+const { risk } = Astro.props;
+const r = RISK_LABEL[risk];
+---
+
+<span class:list={['risk', r.cls]}>{r.text}</span>

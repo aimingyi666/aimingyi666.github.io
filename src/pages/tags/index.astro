@@ -1,0 +1,71 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import { allTags } from '../../data/tags';
+import '../../styles/tags.css';
+
+const tags = await allTags();
+
+// 按热度分三组，组是层级，字只是结果
+const maxCount = Math.max(...tags.map((t) => t.count), 1);
+
+const groups = [
+  {
+    key: 'major',
+    title: '主线',
+    hint: '出现 4 次以上，构成站点的知识骨架',
+    items: tags.filter((t) => t.count >= 4),
+  },
+  {
+    key: 'minor',
+    title: '支线',
+    hint: '出现 2–3 次，跨两三个内容',
+    items: tags.filter((t) => t.count >= 2 && t.count < 4),
+  },
+  {
+    key: 'leaf',
+    title: '长尾',
+    hint: '只出现 1 次，指向单个内容',
+    items: tags.filter((t) => t.count === 1),
+  },
+].filter((g) => g.items.length > 0);
+
+const total = tags.reduce((s, t) => s + t.count, 0);
+---
+
+<Base title="标签" description="按标签浏览全部内容。标签是跨专题、跨专栏的横向索引。">
+  <div class="container">
+    <Breadcrumb items={[{ label: '首页', href: '/' }, { label: '标签' }]} />
+
+    <header class="page-head">
+      <p class="kicker">Tags</p>
+      <h1 class="page-head__title">标签</h1>
+      <p class="page-head__dek">标签是横向索引：专栏按方向分，专题按顺序分，标签跨过两者，把散在不同地方的相关内容串起来。</p>
+      <p class="page-head__meta">
+        <span>{tags.length} 个标签</span>
+        <span>共 {total} 次标记</span>
+      </p>
+    </header>
+
+    <div class="tag-groups">
+      {groups.map((g) => (
+        <section class={`tag-group tag-group--${g.key}`}>
+          <div class="tag-group__head">
+            <p class="tag-group__title">{g.title}</p>
+            <p class="tag-group__hint">{g.hint}</p>
+          </div>
+
+          <div class="tag-grid">
+            {g.items.map((t) => (
+              <a class="tag-card" href={`/tags/${encodeURIComponent(t.slug)}/`}>
+                <span class="tag-card__name">{t.name}</span>
+                <span class="tag-card__bar" style={`width:${Math.round((t.count / maxCount) * 40) + 6}px`} aria-hidden="true"></span>
+                <span class="tag-card__count">{t.count}</span>
+              </a>
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+  </div>
+</Base>

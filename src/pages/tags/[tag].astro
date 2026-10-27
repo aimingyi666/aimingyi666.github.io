@@ -1,0 +1,82 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import Chip from '../../components/Chip.astro';
+import { allTags, tagInfo, relatedTags } from '../../data/tags';
+import { linkFor } from '../../data/content';
+import { GENRE_LABEL } from '../../data/site';
+import '../../styles/tags.css';
+
+export async function getStaticPaths() {
+  const tags = await allTags();
+  return tags.map((t) => ({ params: { tag: t.slug }, props: { name: t.name } }));
+}
+
+interface Props { name: string }
+const { name } = Astro.props;
+
+const tag = (await tagInfo(name))!;
+const related = await relatedTags(name);
+---
+
+<Base
+  title={`标签：${tag.name}`}
+  description={`所有标记为「${tag.name}」的内容，共 ${tag.count} 条。`}
+>
+  <div class="container">
+    <Breadcrumb items={[
+      { label: '首页', href: '/' },
+      { label: '标签', href: '/tags/' },
+      { label: tag.name },
+    ]} />
+
+    <header class="tag-head">
+      <p class="kicker">Tag</p>
+      <h1 class="tag-head__name">#{tag.name}</h1>
+      <p class="page-head__meta">
+        <span>{tag.count} 条内容</span>
+        {related.length > 0 && <span>常与 {related.slice(0, 3).map((r) => r.name).join('、')} 一起出现</span>}
+      </p>
+    </header>
+
+    {related.length > 0 && (
+      <div class="related-tags">
+        <span class="related-tags__label">相关标签</span>
+        {related.map((r) => (
+          <a class="tag" href={`/tags/${encodeURIComponent(r.slug)}/`}>
+            #{r.name}<span style="margin-left:5px;font-family:var(--font-latin);font-size:10px;opacity:.6">{r.count}</span>
+          </a>
+        ))}
+      </div>
+    )}
+
+    <div class="trow-list" style="margin-bottom:var(--s10)">
+      {tag.notes.map((n) => (
+        /* 不能把整行做成 <a>：行内有标签链接，锚点嵌套非法，
+           浏览器会自动闭合外层 <a>，把后面的内容甩到行外。
+           改用「拉伸链接」：标题是唯一的 <a>，用伪元素盖住整行。 */
+        <div class="trow">
+          <span class="trow__date">{n.data.date.toISOString().slice(0, 10).replace(/-/g, '.')}</span>
+
+          <div class="trow__body">
+            <h2 class="trow__title">
+              <a class="trow__link" href={linkFor(n)}>{n.data.title}</a>
+            </h2>
+            {n.data.summary && <p class="trow__dek">{n.data.summary}</p>}
+            <div class="row-tags">
+              <span class="row-tags__item" style="color:var(--brown)">{GENRE_LABEL[n.data.genre]}</span>
+              {n.data.tags.filter((t) => t !== name).map((t) => (
+                <a class="row-tags__item" href={`/tags/${encodeURIComponent(t)}/`}>#{t}</a>
+              ))}
+            </div>
+          </div>
+
+          <span class="trow__side">
+            <Chip maturity={n.data.maturity} />
+          </span>
+        </div>
+      ))}
+    </div>
+  </div>
+
+</Base>

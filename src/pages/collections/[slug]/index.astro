@@ -1,0 +1,101 @@
+---
+// 专题详情页：导言 + 有序文章列表 + 进度
+import Base from '../../../layouts/Base.astro';
+import Chip from '../../../components/Chip.astro';
+import Breadcrumb from '../../../components/Breadcrumb.astro';
+import { COLLECTIONS, GENRE_LABEL, columnName } from '../../../data/site';
+import { inCollection } from '../../../data/content';
+
+export async function getStaticPaths() {
+  return COLLECTIONS.map((c) => ({ params: { slug: c.slug } }));
+}
+
+const { slug } = Astro.params;
+const coll = COLLECTIONS.find((c) => c.slug === slug)!;
+const items = await inCollection(coll.slug);
+
+// 专题进度：已读篇数（静态站没有真实阅读记录，这里用已完成篇数示意）
+const done = items.filter((n) => n.data.maturity === 'evergreen').length;
+const total = items.length || coll.plan;
+const pct = total ? Math.round((done / total) * 100) : 0;
+
+const minutes = (n: any) => {
+  const text = n.body ?? '';
+  return Math.max(3, Math.round(text.length / 350));
+};
+const totalMinutes = items.reduce((s, n) => s + minutes(n), 0);
+---
+
+<Base
+  title={coll.name}
+  description={coll.intro}
+  current="collections"
+  ogType="article"
+>
+  <div class="container">
+    <Breadcrumb items={[
+      { label: '首页', href: '/' },
+      { label: '专题', href: '/collections/' },
+      { label: coll.name },
+    ]} />
+
+    <header class="page-head">
+      <div class="page-head__chips">
+        <Chip maturity={coll.maturity} />
+        <span class="chip chip--outline">专题</span>
+      </div>
+
+      <h1 class="page-head__title">{coll.name}</h1>
+      <p class="page-head__dek">{coll.intro}</p>
+
+      <p class="page-head__meta">
+        <span>{total} 篇</span>
+        <span>约 {totalMinutes} 分钟</span>
+        <span>{columnName(coll.column)}</span>
+      </p>
+
+      <div class="progress">
+        <span class="progress__track" role="progressbar" aria-valuenow={done} aria-valuemin="0" aria-valuemax={total} aria-label="已读进度">
+          <span class="progress__fill" style={`width:${pct}%`}></span>
+        </span>
+        <span class="progress__label">已读 {done} / {total}</span>
+      </div>
+    </header>
+
+    <section>
+      <div class="list-head">
+        <p class="kicker">Reading order</p>
+        <p class="list-head__hint">{coll.hint}</p>
+      </div>
+
+      <div class="ordered-list">
+        {items.map((n, i) => (
+          <a class="ordered-item" href={`/collections/${coll.slug}/${n.id}/`}>
+            <span class="ordered-item__num">{String(i + 1).padStart(2, '0')}</span>
+            <h2 class="ordered-item__title">{n.data.title}</h2>
+            <span class="ordered-item__meta">
+              {GENRE_LABEL[n.data.genre]} · {minutes(n)} 分钟
+            </span>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    {coll.next.length > 0 && (
+      <section class="related" style="margin-top:var(--s9)">
+        <div>
+          <p class="kicker">Next</p>
+          <p class="rail__note" style="margin-top:var(--s2)">这两个专题和本专题互为前提</p>
+        </div>
+        <div class="related__links">
+          {coll.next.map((x) => (
+            <a href={`/collections/${x.slug}/`}>
+              <span class="related__title">{x.name}</span>
+              <span class="related__meta">{x.meta}</span>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+  </div>
+</Base>

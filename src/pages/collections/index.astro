@@ -1,0 +1,47 @@
+---
+// 专题索引
+import Base from '../../layouts/Base.astro';
+import Chip from '../../components/Chip.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import { COLLECTIONS, columnName } from '../../data/site';
+import { inCollection } from '../../data/content';
+
+const list = await Promise.all(
+  COLLECTIONS.map(async (c) => ({ ...c, count: (await inCollection(c.slug)).length }))
+);
+---
+
+<Base title="专题" description="按主题成组阅读的专题合集，每个专题有一句导言和一条阅读顺序。">
+  <div class="container">
+    <Breadcrumb items={[{ label: '首页', href: '/' }, { label: '专题' }]} />
+
+    <header class="page-head">
+      <p class="kicker">Collections</p>
+      <h1 class="page-head__title">专题</h1>
+      <p class="page-head__dek">一个专题讲透一件事，3–5 篇。每个专题有导言和阅读顺序，比按时间翻更有效。</p>
+      <p class="page-head__meta"><span>{list.length} 个专题</span><span>{list.reduce((s, c) => s + c.count, 0)} 篇</span></p>
+    </header>
+
+    <div class="collection-grid" style="padding-bottom:var(--s10)">
+      {list.map((c, i) => (
+        <a class="collection-card" href={`/collections/${c.slug}/`}>
+          <div class="collection-card__top">
+            <span class="collection-card__num">{String(i + 1).padStart(2, '0')}</span>
+            <Chip maturity={c.maturity} />
+          </div>
+          <h2 class="collection-card__title">{c.name}</h2>
+          <p class="collection-card__dek">{c.intro}</p>
+          <div class="collection-card__foot">
+            <span class="collection-card__meta">{c.count} 篇 · {columnName(c.column)}</span>
+            <span class="collection-card__link">
+              开始阅读
+              <svg viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                <path d="M4 2L8 6L4 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
+          </div>
+        </a>
+      ))}
+    </div>
+  </div>
+</Base>

@@ -1,0 +1,234 @@
+/* ==========================================================================
+   tags.css —— 标签索引页与标签详情页
+   ========================================================================== */
+
+/* ---------- 标签索引：分组网格 ----------
+   不用传统标签云（一行排开、字号大小不一）——那在中文和英文混排时
+   会排成一条参差的乱线，看不出层级，也扫不快。
+   改用「按热度分组 + 组内网格」，层级靠分组而不是字号。 */
+
+.tag-groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s8);
+  padding-block: var(--s5) var(--s10);
+}
+
+.tag-group__head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s3);
+  padding-bottom: var(--s3);
+  border-bottom: var(--border) solid var(--line);
+  margin-bottom: var(--s4);
+}
+
+.tag-group__title {
+  font-family: var(--font-latin);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  color: var(--brown);
+  text-transform: uppercase;
+}
+
+.tag-group__hint {
+  font-size: 12px;
+  color: var(--faint);
+}
+
+/* 列宽收到 180，让每格更紧凑，计数不会离名字太远 */
+.tag-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--s2) var(--s5);
+}
+
+/* 名字、条、计数连成一串，向左聚拢。
+   早先用 margin-left: auto 把计数推到最右，结果在一格 280px 里
+   名字和数字隔着一大片空白，看起来像两个不相干的东西。 */
+.tag-card {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding-block: 4px;
+  color: var(--ink);
+  transition: color var(--dur) var(--ease);
+  min-width: 0;
+  justify-content: flex-start;
+}
+.tag-card:hover { color: var(--navy); }
+
+.tag-card__name {
+  font-size: 16px;
+  line-height: 1.5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 0 1 auto;
+}
+
+/* 主线标签用衬线，让它有分量；长尾用无衬线，退到背景里 */
+.tag-group--major .tag-card__name {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.tag-card__count {
+  font-family: var(--font-latin);
+  font-size: 11px;
+  color: var(--faint);
+  flex: none;
+  margin-left: 3px;
+}
+
+/* 迷你条形：用长度表示频次，比纯数字更容易扫 */
+.tag-card__bar {
+  flex: none;
+  height: 3px;
+  background: var(--line-strong);
+  border-radius: 1px;
+  min-width: 8px;
+  align-self: center;
+}
+.tag-group--major .tag-card__bar { background: var(--navy); }
+
+/* ---------- 标签详情页头 ---------- */
+
+.tag-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+  padding-block: var(--s5) var(--s7);
+}
+
+.tag-head__name {
+  font-size: clamp(36px, 5vw, 56px);
+  line-height: 1.26;
+}
+
+/* ---------- 相关标签 ---------- */
+
+.related-tags {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  flex-wrap: wrap;
+  padding-bottom: var(--s6);
+}
+
+.related-tags__label {
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--faint);
+  margin-right: 4px;
+}
+
+/* ---------- 结果行的标签小字 ---------- */
+
+.row-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.row-tags__item {
+  font-size: 11px;
+  color: var(--faint);
+  transition: color var(--dur) var(--ease);
+}
+.row-tags__item:hover { color: var(--navy); }
+
+@media (max-width: 640px) {
+  .tag-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  .tag-card__name { font-size: 15px; }
+  .tag-group--major .tag-card__name { font-size: 18px; }
+}
+
+/* ==========================================================================
+   标签页专用行布局
+   不复用 .article-row：那个是「日期 | 内容 | 标签」三列语义，
+   标签页要塞「日期 | 内容(含标签行) | 徽章」，硬套会挤坏列宽。
+   ========================================================================== */
+
+.trow-list { border-top: var(--border) solid var(--line); }
+
+.trow {
+  /* 三段式：日期固定 90 / 正文占满剩余 / 徽章右对齐固定 76。
+     不用 auto 列——徽章是 inline-flex，auto 会被算成 0。 */
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr) 76px;
+  gap: var(--s5);
+  padding-block: 24px;
+  border-bottom: var(--border) solid var(--line);
+  color: var(--ink);
+  align-items: start;
+  /* 拉伸链接的定位上下文 */
+  position: relative;
+}
+
+/* 整行可点：标题链接用伪元素铺满容器。
+   前提是行内的其他链接（标签）要抬高层级。 */
+.trow__link {
+  color: inherit;
+}
+.trow__link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+/* 行内的标签链接必须盖在拉伸层之上，否则点不到 */
+.row-tags {
+  position: relative;
+  z-index: 2;
+}
+
+/* 悬停反馈跟随整行 */
+.trow:hover .trow__title { color: var(--navy); }
+.trow:focus-within { outline: none; }
+.trow:focus-within .trow__link { outline: 2px solid var(--navy); outline-offset: 3px; }
+
+.trow__date {
+  font-family: var(--font-latin);
+  font-size: 12px;
+  letter-spacing: 0.6px;
+  color: var(--faint);
+  line-height: 1.9;
+  white-space: nowrap;
+}
+
+.trow__body {
+  min-width: 0;
+}
+
+.trow__title {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.5;
+  margin-bottom: 8px;
+  transition: color var(--dur) var(--ease);
+}
+
+.trow__dek {
+  font-size: 14px;
+  line-height: 1.71;
+  color: var(--muted);
+}
+
+.trow__side {
+  justify-self: end;
+  padding-top: 2px;
+}
+
+@media (max-width: 640px) {
+  .trow {
+    grid-template-columns: 1fr;
+    gap: var(--s2);
+  }
+  .trow__date { line-height: 1.6; }
+  .trow__side { justify-self: start; padding-top: 0; }
+}

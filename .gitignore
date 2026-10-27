@@ -1,0 +1,13 @@
+# 构建产物（GitHub Actions 会自动重新构建，无需提交）
+dist/
+.astro/
+
+# 依赖（靠 package-lock.json + npm ci 还原）
+node_modules/
+
+# 杂项
+.DS_Store
+*.log
+.env
+.env.*
+!.env.example

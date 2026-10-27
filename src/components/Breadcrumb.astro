@@ -1,0 +1,27 @@
+---
+// 面包屑：最后一项是当前页，不可点
+import { withBase } from '../data/site';
+interface Item {
+  label: string;
+  href?: string;
+}
+interface Props {
+  items: Item[];
+}
+const { items } = Astro.props;
+---
+
+<nav class="breadcrumb" aria-label="面包屑">
+  {items.map((item, i) => (
+    <>
+      {i > 0 && (
+        <svg viewBox="0 0 10 10" fill="none" aria-hidden="true">
+          <path d="M3.5 2L7 5L3.5 8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      )}
+      {item.href
+        ? <a href={withBase(item.href)}>{item.label}</a>
+        : <span class="breadcrumb__current">{item.label}</span>}
+    </>
+  ))}
+</nav>

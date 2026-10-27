@@ -1,0 +1,191 @@
+---
+import Base from '../layouts/Base.astro';
+import Chip from '../components/Chip.astro';
+import ArticleRow from '../components/ArticleRow.astro';
+import Subscribe from '../components/Subscribe.astro';
+import { SITE, COLUMNS, COLLECTIONS, withBase } from '../data/site';
+import { latest, inCollection, inColumn, toolbox, urlFor, linkFor } from '../data/content';
+
+const recent = await latest(5);
+const tools = await toolbox();
+
+// 首页专题卡：取前三个，篇数按实际内容算
+const featured = await Promise.all(
+  COLLECTIONS.slice(0, 3).map(async (c) => ({
+    ...c,
+    count: (await inCollection(c.slug)).length,
+  }))
+);
+
+// 专栏篇数也按实际算，不写死
+const columnsWithCount = await Promise.all(
+  COLUMNS.map(async (c) => ({ ...c, count: (await inColumn(c.slug)).length }))
+);
+
+const totalCollections = COLLECTIONS.length;
+const totalNotes = (await latest(1000)).length;
+const totalTools = tools.length;
+---
+
+<Base current="columns">
+  <section class="hero">
+    <div class="container hero__inner">
+      <p class="kicker hero__eyebrow">个人知识库 · 笔记 · 工具</p>
+
+      <h1 class="hero__title">把学到的零散东西<br />连成一张能用的网</h1>
+
+      <p class="hero__dek">{SITE.description}</p>
+
+      <form class="search" role="search" action={withBase('/search/')} method="get">
+        <label class="visually-hidden" for="q">搜索文章、专题或关键词</label>
+        <input id="q" name="q" type="search" placeholder="搜索文章、专题或关键词" autocomplete="off" />
+        <span class="search__icon" aria-hidden="true">
+          <svg viewBox="0 0 18 18" fill="none">
+            <circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.5" />
+            <path d="M12.2 12.2L15.5 15.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+          </svg>
+        </span>
+      </form>
+
+      <div class="hero__actions">
+        <a class="btn btn--primary" href={withBase('/collections/')}>从专题开始读</a>
+        <a class="link-arrow" href={withBase('/notes/')}>
+          看最新文章
+          <svg viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <path d="M5 2.5L9.5 7L5 11.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </a>
+      </div>
+
+      <p class="hero__meta">
+        <span>{totalCollections} 个专题</span>
+        <span>{totalNotes} 条笔记</span>
+        <span>{totalTools} 个脚本</span>
+      </p>
+    </div>
+  </section>
+
+  <nav class="column-band" id="columns" aria-label="专栏">
+    <div class="container column-band__inner">
+      {columnsWithCount.filter((c) => c.count > 0).map((c) => (
+        <a class="column-band__item" href={withBase(`/columns/${c.slug}/`)}>
+          <span class="column-band__name">{c.name}</span>
+          <span class="column-band__count">{c.count} 篇</span>
+        </a>
+      ))}
+    </div>
+  </nav>
+
+  <section class="toolbox-band" id="toolbox" aria-label="工具库">
+    <div class="container toolbox-band__inner">
+      <div class="toolbox-band__left">
+        <span class="kicker">Toolbox</span>
+        <span class="toolbox-band__desc">{totalTools} 个脚本与命令 · 按任务找，不按知识找</span>
+      </div>
+      <a class="link-arrow" href={withBase('/toolbox/')}>
+        打开工具库
+        <svg viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M5 2.5L9.5 7L5 11.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </a>
+    </div>
+  </section>
+
+  <section class="section" id="collections">
+    <div class="container">
+      <div class="section__head">
+        <div class="section__head-left">
+          <p class="kicker">Collections</p>
+          <h2 class="section__title">按主题成组阅读</h2>
+        </div>
+        <a class="link-arrow" href={withBase('/collections/')}>
+          查看全部 {totalCollections} 个专题
+          <svg viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <path d="M5 2.5L9.5 7L5 11.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </a>
+      </div>
+
+      <div class="collection-grid">
+        {featured.map((c, i) => (
+          <a class="collection-card" href={withBase(`/collections/${c.slug}/`)}>
+            <div class="collection-card__top">
+              <span class="collection-card__num">{String(i + 1).padStart(2, '0')}</span>
+              <Chip maturity={c.maturity} />
+            </div>
+            <h3 class="collection-card__title">{c.name}</h3>
+            <p class="collection-card__dek">{c.intro}</p>
+            <div class="collection-card__foot">
+              <span class="collection-card__meta">
+                {c.count} 篇 · {COLUMNS.find((x) => x.slug === c.column)?.name}
+              </span>
+              <span class="collection-card__link">
+                开始阅读
+                <svg viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                  <path d="M4 2L8 6L4 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </span>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tight" id="latest">
+    <div class="container">
+      <div class="section__head">
+        <div class="section__head-left">
+          <p class="kicker">Latest</p>
+          <h2 class="section__title">最近更新</h2>
+        </div>
+        <a class="link-arrow" href={withBase('/notes/')}>
+          全部文章
+          <svg viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <path d="M5 2.5L9.5 7L5 11.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </a>
+      </div>
+
+      <div class="article-list">
+        {recent.map((n) => (
+          <ArticleRow
+            href={linkFor(n)}
+            date={n.data.date}
+            title={n.data.title}
+            dek={n.data.summary}
+            tag={COLUMNS.find((c) => c.slug === n.data.column)?.name}
+          />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="statement" id="about">
+    <div class="container">
+      <div class="statement__head">
+        <p class="kicker">What we write</p>
+        <h2 class="statement__title">这站在写什么</h2>
+      </div>
+
+      <div class="statement__body">
+        <div>
+          <p class="statement__quote">
+            这里写的是我自己跑通过、也踩过坑的技术路径。每篇尽量写清三件事：方案在什么环境下成立、它解决的是哪一环、它在什么条件下不成立。
+          </p>
+          <p class="statement__note">
+            如果你要的是一键脚本和复制粘贴，这里可能不合适；如果你想弄明白某个方案为什么在你机器上失效，可以留下。
+          </p>
+        </div>
+
+        <ul class="boundary">
+          <li class="boundary__item"><span class="boundary__mark" aria-hidden="true"></span>不写没有实测环境的方案</li>
+          <li class="boundary__item"><span class="boundary__mark" aria-hidden="true"></span>不写复制粘贴式的配置堆砌</li>
+          <li class="boundary__item"><span class="boundary__mark" aria-hidden="true"></span>不写转述官方文档的教程</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <Subscribe />
+</Base>

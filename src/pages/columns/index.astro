@@ -1,0 +1,45 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import { COLUMNS } from '../../data/site';
+import { inColumn } from '../../data/content';
+
+const list = await Promise.all(
+  COLUMNS.map(async (c) => ({ ...c, count: (await inColumn(c.slug)).length }))
+);
+---
+
+<Base title="专栏" description="长期方向：AI 工程落地、AI 工具链、工程基本功、技术成长、踩坑与排障。" current="columns">
+  <div class="container">
+    <Breadcrumb items={[{ label: '首页', href: '/' }, { label: '专栏' }]} />
+
+    <header class="page-head">
+      <p class="kicker">Columns</p>
+      <h1 class="page-head__title">专栏</h1>
+      <p class="page-head__dek">长期写作方向，平级无主次。按最近更新排序，不按重要性——因为不存在重要性排序。</p>
+    </header>
+
+    <div class="collection-grid" style="padding-bottom:var(--s10)">
+      {list.map((c) => (
+        <a class:list={['collection-card', c.count === 0 && 'collection-card--empty']}
+           href={`/columns/${c.slug}/`}>
+          <div class="collection-card__top">
+            <span class="collection-card__num" style="font-size:22px">
+              {c.count === 0 ? '筹备中' : `${c.count} 篇`}
+            </span>
+          </div>
+          <h2 class="collection-card__title">{c.name}</h2>
+          <p class="collection-card__dek">{c.desc}</p>
+          <div class="collection-card__foot">
+            <span class="collection-card__link">
+              {c.count === 0 ? '看看计划' : '进入专栏'}
+              <svg viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                <path d="M4 2L8 6L4 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
+          </div>
+        </a>
+      ))}
+    </div>
+  </div>
+</Base>

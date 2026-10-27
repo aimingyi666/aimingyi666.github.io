@@ -1,0 +1,104 @@
+/* ==========================================================================
+   tokens.css —— 全站唯一的设计变量来源
+   对应文档：设计规范.md
+   规则：页面里不允许出现本文件之外的色值、字号、间距
+   ========================================================================== */
+
+:root {
+  /* ---------- 底色 ---------- */
+  --paper: #FAFAF7;        /* 页面底色，不用纯白 */
+  --white: #FFFFFF;        /* 输入框、工具库索引带 */
+  --tint: #F2EFE6;         /* 定位区块（暖纸） */
+  --chip-bg: #EFEBE0;      /* 标签底、生长中 */
+
+  /* ---------- 文字 ---------- */
+  --ink: #1A1A1A;          /* 正文主色，也是深色块底色 */
+  --body: #444444;         /* 次级正文 */
+  --muted: #5C5C5C;        /* 辅助说明 */
+  --faint: #8A8578;        /* 元信息、图注、占位符 */
+
+  /* ---------- 线 ---------- */
+  --line: #E5E2D7;         /* 主分隔线 */
+  --line-strong: #CFC9B8;  /* 描边按钮、标签描边 */
+  --line-chip: #DCD6C4;    /* 标签内描边 */
+  --numeral: #D5CFBD;      /* 未读序号、大号数字 */
+
+  /* ---------- 语义 ---------- */
+  --navy: #003B5C;         /* 唯一强调色 */
+  --brown: #7D5A2F;        /* 眉标、需备份 */
+  --green: #0E4D3C;        /* 安全、已成体系 */
+  --red: #B22222;          /* 破坏性、未实测 */
+
+  --green-bg: #E3EDE6;
+  --safe-bg: #E6EFE9;      /* 安全徽章底（比 green-bg 略偏青） */
+  --brown-bg: #F3EADF;
+  --red-bg: #F7E4E4;
+  --red-bg-soft: #F7E8E8;
+  --mark-bg: #F5EBC8;      /* 搜索结果命中词高亮底 */
+
+  /* ---------- 代码块 ---------- */
+  --code-bg: #1A1A1A;
+  --code-head: #242424;
+  --code-head-danger: #2A1A1A;
+  --code-text: #E8E4D8;
+  --code-comment: #8A8578;
+  --code-warn: #E9C08A;
+  --code-key: #9FC4D8;     /* 代码块里的关键字 */
+  --code-danger-lang: #C08A8A; /* 危险命令块的语言标签 */
+
+  /* ---------- 深色块内的输入控件 ---------- */
+  --ink-input: #242424;    /* 墨黑底上的输入框 */
+  --ink-line: #3A3A3A;     /* 墨黑底上的描边 */
+  --ink-text-dim: #B8B2A4; /* 墨黑底上的次级文字 */
+
+  /* ---------- 装饰 ---------- */
+  --wordmark: #E9E3D3;     /* 页脚字标，几乎看不见 */
+
+  /* ---------- 字体 ----------
+     生产环境建议自托管 Noto Serif SC / Noto Sans SC（woff2 子集），
+     下面的回退链保证在没装字体时也不会崩版。 */
+  --font-serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "SimSun", serif;
+  --font-sans: "Noto Sans SC", "Source Han Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", "SFMono-Regular", ui-monospace, monospace;
+  --font-latin: "Inter", var(--font-sans);
+
+  /* ---------- 栅格 ---------- */
+  --content: 1200px;       /* 1440 - 120 × 2 */
+  --gutter: 120px;         /* 页面左右内边距 */
+  --reading: 720px;        /* 正文栏 */
+  --rail: 280px;           /* 侧栏 */
+
+  /* ---------- 细节 ---------- */
+  --radius: 2px;           /* 全站唯一圆角 */
+  --border: 1px;           /* 全站唯一边框粗细 */
+
+  /* ---------- 间距阶梯（4 的倍数） ---------- */
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 24px;
+  --s6: 32px;
+  --s7: 40px;
+  --s8: 48px;
+  --s9: 56px;
+  --s10: 64px;
+  --s11: 80px;
+  --s12: 96px;
+  --s13: 120px;
+
+  /* ---------- 动效 ---------- */
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --dur: 160ms;
+}
+
+/* 断点：内容宽度收窄时同步收 gutter，保证内容区始终 1200 以内 */
+@media (max-width: 1200px) {
+  :root { --gutter: 56px; }
+}
+@media (max-width: 860px) {
+  :root { --gutter: 32px; }
+}
+@media (max-width: 560px) {
+  :root { --gutter: 20px; }
+}

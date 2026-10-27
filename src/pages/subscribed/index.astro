@@ -1,0 +1,34 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import { withBase } from '../../data/site';
+---
+
+<Base title="订阅成功" description="订阅确认。">
+  <div class="container">
+    <Breadcrumb items={[{ label: '首页', href: '/' }, { label: '订阅成功' }]} />
+
+    <header class="page-head">
+      <p class="kicker">Subscribed</p>
+      <h1 class="page-head__title">订阅成功</h1>
+      <p class="page-head__dek">新专题发布时会发一封邮件，只发长文，不转发别人的观点。</p>
+    </header>
+
+    <div class="about-body">
+      <h2>接下来</h2>
+      <p>去服务器上确认一下：如果用的是第三方表单服务，它会先给你发一封验证邮件，点里面的链接才算真的订阅上。</p>
+      <p class="muted-line">没收到？看一下垃圾邮件目录，或者直接把发件人加进白名单。</p>
+
+      <h2>随时可以退</h2>
+      <p>每封邮件底部都有退订链接，点一下立即生效，不用回信也不用说明理由。</p>
+
+      <h2>等不及的话</h2>
+      <p>邮件是不定期的，因为你写的东西本来就不定期。想第一时间看到，RSS 更快。</p>
+      <ul>
+        <li><a href={withBase('/rss.xml')}>RSS 订阅</a> —— 任何阅读器都行</li>
+        <li><a href={withBase('/collections/')}>从专题开始读</a> —— 已有的内容按顺序看</li>
+        <li><a href={withBase('/toolbox/')}>去工具库</a> —— 只想复制命令就走</li>
+      </ul>
+    </div>
+  </div>
+</Base>

@@ -1,0 +1,37 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import ArticleRow from '../../components/ArticleRow.astro';
+import { published, urlFor, linkFor } from '../../data/content';
+
+const all = await published();
+const items = all.filter((n) => n.data.genre !== 'log');
+---
+
+<Base title="笔记" description="原子笔记：一条一个概念，互相链接。标「生长中」的还在验证，标「已成体系」的可以直接用。" current="notes">
+  <div class="container">
+    <Breadcrumb items={[{ label: '首页', href: '/' }, { label: '笔记' }]} />
+
+    <header class="page-head">
+      <p class="kicker">Notes</p>
+      <h1 class="page-head__title">笔记</h1>
+      <p class="page-head__dek">一条一个概念，互相链接。标「生长中」的还在验证，标「已成体系」的可以直接用。</p>
+      <p class="page-head__meta">
+        <span>{items.length} 条</span>
+        <span>按更新时间排序</span>
+      </p>
+    </header>
+
+    <div class="article-list" style="margin-bottom:var(--s10)">
+      {items.map((n) => (
+        <ArticleRow
+          href={linkFor(n)}
+          date={n.data.date}
+          title={n.data.title}
+          dek={n.data.summary}
+          maturity={n.data.maturity}
+        />
+      ))}
+    </div>
+  </div>
+</Base>

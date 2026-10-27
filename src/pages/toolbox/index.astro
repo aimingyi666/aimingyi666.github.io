@@ -1,0 +1,109 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import RiskBadge from '../../components/RiskBadge.astro';
+import VerifyLine from '../../components/VerifyLine.astro';
+import { TASKS, RISK_LABEL, withBase } from '../../data/site';
+import { toolbox, urlFor, linkFor } from '../../data/content';
+
+const entries = await toolbox();
+
+// 按任务分组，保持 TASKS 的顺序
+const groups = TASKS.map((t) => ({
+  ...t,
+  items: entries.filter((e) => e.data.task === t.slug),
+})).filter((g) => g.items.length > 0);
+
+const activeTask = Astro.url.searchParams.get('task');
+const shown = activeTask ? groups.filter((g) => g.slug === activeTask) : groups;
+const totalShown = shown.reduce((s, g) => s + g.items.length, 0);
+---
+
+<Base title="工具库" description="按任务找，不按知识找。每条命令都标来源、验证环境与风险等级。" current="toolbox">
+  <div class="container">
+
+    <header class="tool-head">
+      <div class="tool-head__text">
+        <p class="kicker">Toolbox</p>
+        <h1 class="tool-head__title">工具库</h1>
+        <p class="tool-head__desc">按任务找，不按知识找。每条都标来源、验证环境与风险等级。</p>
+      </div>
+
+      <form class="search" role="search" action={withBase('/search/')} method="get">
+        <label class="visually-hidden" for="q">搜索工具、命令或场景</label>
+        <input id="q" name="q" type="search" placeholder="搜索工具、命令或场景" autocomplete="off" />
+        <span class="search__icon" aria-hidden="true">
+          <svg viewBox="0 0 18 18" fill="none">
+            <circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.5" />
+            <path d="M12.2 12.2L15.5 15.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+          </svg>
+        </span>
+      </form>
+    </header>
+
+    <div class="tool-layout">
+
+      <nav class="task-nav" aria-label="按任务筛选">
+        <p class="task-nav__label">按任务</p>
+        <a class:list={['task-nav__item', !activeTask && 'is-active']} href={withBase('/toolbox/')}>
+          全部<span class="task-nav__count">{entries.length}</span>
+        </a>
+        {TASKS.map((t) => {
+          const count = entries.filter((e) => e.data.task === t.slug).length;
+          return (
+            <a class:list={['task-nav__item', activeTask === t.slug && 'is-active']}
+               href={withBase(`/toolbox/?task=${t.slug}`)}>
+              {t.name}<span class="task-nav__count">{count}</span>
+            </a>
+          );
+        })}
+      </nav>
+
+      <div>
+        {shown.map((g) => (
+          <>
+            {activeTask === null && <p class="kicker" style="padding:0 0 var(--s3)">{g.name}</p>}
+            <div class="tool-list">
+              {g.items.map((e) => (
+                <a class="tool-item" href={linkFor(e)} style="color:inherit">
+                  <div class="tool-item__head">
+                    <h2 class="tool-item__name">{e.data.title}</h2>
+                    {e.data.risk && <RiskBadge risk={e.data.risk} />}
+                  </div>
+
+                  {e.data.summary && <p class="tool-item__purpose">{e.data.summary}</p>}
+
+                  {e.data.verified && (
+                    <VerifyLine
+                      status={e.data.verified.status}
+                      env={e.data.verified.env}
+                      date={e.data.verified.date}
+                    />
+                  )}
+
+                  <div class="tool-item__foot">
+                    <span class="tool-item__source">
+                      来源　{e.data.source?.author ?? '未记录'}
+                      {e.data.source?.license ? `（${e.data.source.license}）` : ''}
+                      {e.data.source?.change ? `·　${e.data.source.change}` : ''}
+                    </span>
+                    <span class="tool-item__rel">查看命令 →</span>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </>
+        ))}
+
+        {totalShown === 0 && (
+          <p class="rail__note">这个分类下还没有条目。</p>
+        )}
+
+        <p class="risk-legend">
+          风险等级　安全 = 可随时执行　·　需备份 = 执行前先备份　·　破坏性 = 不可撤销，先确认再跑
+        </p>
+      </div>
+
+    </div>
+  </div>
+</Base>

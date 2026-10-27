@@ -1,0 +1,32 @@
+---
+// 验证状态行
+// 硬约束：status === 'tested' 时 env 必填，否则构建报错。
+// 这样「实测通过」不可能不带环境出现在页面上。
+
+import { VERIFY_LABEL } from '../data/site';
+
+interface Props {
+  status: 'tested' | 'untested' | 'expired';
+  env?: string;
+  date?: Date;
+}
+
+const { status, env, date } = Astro.props;
+
+if (status === 'tested' && !env) {
+  throw new Error('[验证状态] status="tested" 时必须提供 env —— 见知识库架构.md 第 16 节 B');
+}
+
+const label = VERIFY_LABEL[status];
+const isUntested = status === 'untested';
+const dateText = date
+  ? date.toISOString().slice(0, 10).replace(/-/g, '.')
+  : null;
+---
+
+<p class="tool-item__env">
+  <span class="tool-item__env-label">环境</span>
+  <span class:list={['tool-item__env-value', isUntested && 'tool-item__env-value--untested']}>
+    {label}{env ? `　${env}` : ''}{dateText ? `　·　${dateText}` : ''}
+  </span>
+</p>

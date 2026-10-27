@@ -1,0 +1,88 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import { SITE, withBase } from '../../data/site';
+import { published } from '../../data/content';
+
+const items = await published();
+const byMonth = new Map<string, typeof items>();
+for (const n of items) {
+  const key = n.data.date.toISOString().slice(0, 7);
+  if (!byMonth.has(key)) byMonth.set(key, []);
+  byMonth.get(key)!.push(n);
+}
+---
+
+<Base title="关于" description="一个按专题写作的个人知识库。写什么、不写什么，成熟度与验证标注怎么读。">
+  <div class="container">
+    <Breadcrumb items={[{ label: '首页', href: '/' }, { label: '关于' }]} />
+
+    <header class="page-head">
+      <p class="kicker">About</p>
+      <h1 class="page-head__title">关于这个站</h1>
+      <p class="page-head__dek">我是这个站唯一的作者。这里是我的公开知识库——笔记、专题，和一堆能直接复制的脚本。</p>
+    </header>
+
+    <div class="about-body">
+
+      <h2>这个站为什么存在</h2>
+      <p>我原本只用 Obsidian 记东西。问题是一年后翻回去，很多笔记自己都看不懂了：当时为什么这么判断、试过什么、哪条路走不通，全没记。</p>
+      <p>所以这个站首先是给我自己的：把笔记写成<strong>别人也能看懂</strong>的样子，逼自己把话说完整。既然要写完整，不如公开——有人看，我会更认真。</p>
+      <p>每一篇都尽量写清三件事：这个方案在什么环境下成立、它解决的是哪一环、它在什么条件下不成立。</p>
+
+      <h2>这不是一个博客</h2>
+      <p>博客是时间流，看最新的就行。这里是一个知识库：笔记之间互相链接，专题给出一条阅读顺序，工具库按任务索引。</p>
+      <p>所以你会看到三种进入方式：</p>
+      <ul>
+        <li>想系统学 —— 从<a href={withBase('/collections/')}>专题</a>进，按顺序读</li>
+        <li>想弄明白一件事 —— 从<a href={withBase('/notes/')}>笔记</a>进，跟着链接跳</li>
+        <li>只想把事办成 —— 从<a href={withBase('/toolbox/')}>工具库</a>进，复制命令就走</li>
+      </ul>
+
+      <h2>我写什么，不写什么</h2>
+      <p>写：AI 工程落地、AI 工具链配置、工程基本功、技术成长路径，以及没归类的折腾。</p>
+      <p>不写：没有实测环境的方案、复制粘贴式的配置堆砌、转述官方文档的教程。</p>
+      <p class="muted-line">也不写热点速评——版本更新我追不过来，但原理和边界相对稳定。</p>
+
+      <h2>五种内容体裁</h2>
+      <p>站内内容分五类，标题旁会标注：</p>
+      <ul>
+        <li><strong>笔记</strong> —— 一条一个概念，可能还没写完。</li>
+        <li><strong>长文</strong> —— 讲原理与判断，读完理解为什么。</li>
+        <li><strong>手册</strong> —— 分步配置与截图，照着做能跑通。</li>
+        <li><strong>排障</strong> —— 从现象到根因的完整定位过程。</li>
+        <li><strong>日志</strong> —— 一段进展或一次折腾，最短也最随意。</li>
+      </ul>
+      <p class="muted-line">看到「手册」标签时，请直接跳到步骤，不必读铺垫。</p>
+
+      <h2>关于「还没写完」</h2>
+      <p>站上的内容分两档成熟度：<strong>生长中</strong> 和 <strong>已成体系</strong>。</p>
+      <p>标「生长中」的意思是：骨架有了，但案例或验证还不完整——可以看思路，结论别急着照做。</p>
+      <p>还没长成骨架的笔记（我自己叫「刚起头」）不会放上来。我不想让你点开一篇三行字的笔记然后关掉。</p>
+      <p class="muted-line">这条规则由构建脚本执行，不靠我自觉：<code>maturity: seedling</code> 的内容根本不会生成页面。</p>
+
+      <h2>工具库里的脚本</h2>
+      <p>大部分是转载或改写的，但<strong>每一条我都跑过</strong>，并且标了在什么环境跑通的。</p>
+      <p>所以你会看到「实测通过 · macOS 14.5 / 版本号」这种写法——那不是啰嗦，是告诉你这条结论的适用范围。</p>
+      <p>没实测的会明确标「未实测」，过期的会标「已失效」。看到这两个标签，请自己再验一遍。</p>
+      <p class="muted-line">这条也由构建脚本执行：标「实测通过」却不写环境，构建会直接失败。</p>
+
+      <h2>为什么更新不定期</h2>
+      <p>我按专题写。一个专题通常 3–5 篇，讲完再开下一个。</p>
+      <p>这意味着更新频率不稳定，但你能拿到完整的思考，而不是为保持节奏切碎的片段。</p>
+
+      <h2>这个站怎么做的</h2>
+      <p>静态生成，无框架、无追踪、无广告。内容用 Markdown 写，代码在本地，构建完就是一叠 HTML。</p>
+      <p class="muted-line">目前共 {items.length} 条已发布内容。源码与结构说明见站点的公开仓库。</p>
+
+      <h2>关于我</h2>
+      <p class="muted-line">（此处待补：当前职业 / 技术方向 / 大致经历）</p>
+      <p>一句话原则：只写自己在真实环境里跑过、并且失败过至少一次的东西。</p>
+
+      <h2>版权与联系</h2>
+      <p>除特别注明外，本站内容采用 CC BY-NC-SA 4.0 授权，转载请注明出处。转载的脚本会单独标注原始出处与许可证。</p>
+      <p>讨论、纠错、约稿：<a href={`mailto:${SITE.email}`}>{SITE.email}</a></p>
+
+    </div>
+  </div>
+</Base>

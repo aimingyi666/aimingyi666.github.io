@@ -1,0 +1,53 @@
+---
+// 日志：独立时间流，不进专栏、不进专题
+import Base from '../../layouts/Base.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import { logs } from '../../data/content';
+
+const items = await logs();
+
+// 按月分组
+const byMonth = new Map<string, typeof items>();
+for (const n of items) {
+  const key = n.data.date.toISOString().slice(0, 7).replace('-', ' 年 ') + ' 月';
+  if (!byMonth.has(key)) byMonth.set(key, []);
+  byMonth.get(key)!.push(n);
+}
+---
+
+<Base title="日志" description="过程记录：一段进展、一次折腾。最短，也最随意。">
+  <div class="container">
+    <Breadcrumb items={[{ label: '首页', href: '/' }, { label: '日志' }]} />
+
+    <header class="page-head">
+      <p class="kicker">Log</p>
+      <h1 class="page-head__title">日志</h1>
+      <p class="page-head__dek">过程记录：一段进展、一次折腾。不算交付物，但丢掉又可惜——这类东西放这儿。</p>
+      <p class="page-head__meta"><span>{items.length} 条</span><span>不参与 RSS 与专题</span></p>
+    </header>
+
+    <div style="padding-bottom:var(--s10)">
+      {[...byMonth.entries()].map(([month, list]) => (
+        <section style="margin-bottom:var(--s9)">
+          <div class="list-head">
+            <p class="kicker">{month}</p>
+          </div>
+          <div class="article-list">
+            {list.map((n) => (
+              <a class="article-row" href={`/log/${n.id}/`}>
+                <span class="article-row__date">{n.data.date.toISOString().slice(0, 10).replace(/-/g, '.')}</span>
+                <div>
+                  <h2 class="article-row__title">{n.data.title}</h2>
+                  {n.data.summary && <p class="article-row__dek">{n.data.summary}</p>}
+                </div>
+                <span class="article-row__side"><span class="chip chip--outline">日志</span></span>
+              </a>
+            ))}
+          </div>
+        </section>
+      ))}
+
+      {items.length === 0 && <p class="rail__note">还没有日志。</p>}
+    </div>
+  </div>
+</Base>
